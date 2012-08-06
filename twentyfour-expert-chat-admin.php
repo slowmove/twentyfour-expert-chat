@@ -1,11 +1,13 @@
 <?php
 
 // create custom plugin settings menu
-add_action('admin_menu', 'ExpertChat_create_menu');
+//add_action('admin_menu', 'ExpertChat_create_menu');
+add_action('network_admin_menu', 'ExpertChat_create_menu');
 
 function ExpertChat_create_menu() 
 {
     // create admin page
+    
     add_menu_page('Expertchatt', 'Expertchatt', 'manage_options', __DIR__, 'expertchat_admin_page');
 	add_submenu_page(__DIR__, 'Arkiverade chattar', 'Arkiverade chattar', 'manage_options', 'twentyfourExpertChat_archive', 'twentyfourExpertChat_archive_page');
 	add_submenu_page(__DIR__, 'Hantera chattar', 'Hantera chattar', 'manage_options', 'twentyfourExpertChat_new', 'twentyfourExpertChat_new_page');
@@ -100,8 +102,12 @@ function expertchat_admin_page()
 			<p>
 				Gå in under <strong>Expertchatt -> Hantera chattar</strong> för att skapa en ny expertchatt.
 			</p>
-			<?php
-			$nextchats = $expertchatAdmin->get_future_chats();
+                <?php
+		endif;
+		?>
+                        
+                <?php
+                $nextchats = $expertchatAdmin->get_future_chats();
 			if ( count($nextchats) > 0):
 				$nextchat = $nextchats[0];
 				?>
@@ -112,8 +118,8 @@ function expertchat_admin_page()
 				</p>
 				<?php
 			endif;
-		endif;
-		?>
+                ?>
+                        
 	</div>
     <script type="text/javascript">
         jQuery(document).ready(function(){

@@ -1,9 +1,11 @@
 <?php
+global $blog_id;
 $pluginRoot = plugins_url('', __FILE__);
-$expertchat = new ExpertChat();
+$expertchat = new ExpertChat($blog_id);
 $activechat = $expertchat->get_active_chat();
 $expert_name = get_the_author_meta("first_name", $activechat->user);
 $date = new DateTime($activechat->createDate);
+
 
 //echo "is active: " . $expertchat->is_active_chat() . "<br/>";
 //echo "archived chats: " . count($expertchat->get_archived_chats());

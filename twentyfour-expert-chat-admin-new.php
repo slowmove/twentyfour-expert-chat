@@ -12,6 +12,7 @@
     $user = $_POST["user"];
     $chattitle = $_POST["chattitle"];
     $chattext = $_POST["chattext"];
+    $site = $_POST['site'];
     
     global $wpdb;
     $wp_user_search = $wpdb->get_results("SELECT ID, display_name FROM $wpdb->users ORDER BY ID");
@@ -20,7 +21,7 @@
     $chatadmin = new ExpertChat();
     
     if( $startDate != "" && intval($user) > 0):
-        $chatadmin->create_chat($startDate, $user, $chattitle, $chattext);
+        $chatadmin->create_chat($startDate, $user, $chattitle, $chattext, $site);
         echo "<h3>Din chatt är tillagd. Du kan fortsätta skapa ytterligare chattar.</h3>";
     endif;
     ?>
@@ -119,6 +120,19 @@
             <option value="30">30</option>
             <option value="40">40</option>
             <option value="50">50</option>
+        </select>
+        
+        <?php
+        
+            $sites = get_blog_list(0, 'all');
+            
+        ?>
+        
+        <select type="text" name="site" id="site">
+            <option selected="selected">Välj site</option>
+            <?php foreach($sites as $site): ?>
+            <option value="<?php echo $site['blog_id']; ?>"><?php echo $site['path']; ?></option>    
+            <?php endforeach; ?>
         </select>
         <select type="text" name="user" id="user" placeholder="user id">
             <option selected="selected">Välj användare</option>

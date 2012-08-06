@@ -41,7 +41,9 @@ class ExpertChat
 	public $tableNameQuestions;
 
     private $wpdb;
-	
+
+    public $site_id;
+    
     // creates an instance of the class, if no isntance was created before (singleton implementation)
 	public static function getInstance()
 	{
@@ -52,21 +54,33 @@ class ExpertChat
 		return self::$singletonRef;
 	}	
     
-    public function __construct()
+    public function __construct($site_id=null)
     {
+            if($site_id != null){
+                $this->site_id = $site_id;
+            }
+        
 	    global $wpdb;
 	    $this->wpdb = $wpdb;
+            //Change!
+            $wpdb->prefix = 'wp_';
 	    
 	    $this->tableNameChats = $this->wpdb->prefix . ExpertChat::$tables['expertchats'];
 	    $this->tableNameQuestions = $this->wpdb->prefix . ExpertChat::$tables['questions'];	    
     }
 	
-	public function create_chat($startdate, $userid, $title, $text)
+	public function create_chat($startdate, $userid, $title, $text, $site_id=null)
 	{
+            //If parameter site_id is set then add site_id to column
+            if($site_id == null){
+                $site_id = $this->site_id;
+            }
+            
 		// create an upcoming chat
     	// set in db and show in active chat in admin area
         $result = $this->wpdb->insert($this->tableNameChats, 
         	array( 
+                        'site_id' => $site_id,
         		'createDate' => $startdate, 
         		'open' => 0,
         		'user' => intval($userid),
@@ -107,8 +121,16 @@ class ExpertChat
 
     public function is_active_chat()
     {
+        
         //check if there is a active chat available
-        $active_count = $this->wpdb->get_var( "SELECT COUNT(*) FROM $this->tableNameChats WHERE open = 1" );
+       
+        if($this->site_id != null){
+            $active_count = $this->wpdb->get_var( "SELECT COUNT(*) FROM $this->tableNameChats WHERE open = 1 AND site_id = $this->site_id");
+            
+        }else{
+            $active_count = $this->wpdb->get_var( "SELECT COUNT(*) FROM $this->tableNameChats WHERE open = 1 " );
+        }
+        
         if( $active_count > 0 )
             return true;
         else
@@ -122,22 +144,39 @@ class ExpertChat
         return $result[0];    	
     }
 	
-	public function get_latest_chat()
-	{
-        $result = $this->wpdb->get_results("SELECT * FROM $this->tableNameChats WHERE open = 0 AND stopDate < CURRENT_TIMESTAMP AND stopDate != '0000-00-00 00:00:00' ORDER BY createDate DESC");
+    public function get_latest_chat()
+    {
+        //Conditional statement to check if site_id is set. If so get data for that specific site.
+        if($this->site_id != null){
+            $result = $this->wpdb->get_results("SELECT * FROM $this->tableNameChats WHERE open = 0 AND stopDate < CURRENT_TIMESTAMP AND stopDate != '0000-00-00 00:00:00' AND site_id = $this->site_id ORDER BY createDate DESC");
+        }else{
+            $result = $this->wpdb->get_results("SELECT * FROM $this->tableNameChats WHERE open = 0 AND stopDate < CURRENT_TIMESTAMP AND stopDate != '0000-00-00 00:00:00' ORDER BY createDate DESC");
+        }
+
+    // TO BE DELETED!  
+    //$result = $this->wpdb->get_results("SELECT * FROM $this->tableNameChats WHERE open = 0 AND stopDate < CURRENT_TIMESTAMP AND stopDate != '0000-00-00 00:00:00' ORDER BY createDate DESC");
         return $result[0];		
-	}
+    }
 
     public function get_archived_chats()
     {
+        // get their id's from db
+        //Conditional statement to check if site_id is set. If it is then get data for that specific site.
+        if(!is_null($this->site_id)){
+            $result = $this->wpdb->get_results("SELECT * FROM $this->tableNameChats WHERE open = 0 AND stopDate < CURRENT_TIMESTAMP AND stopDate != '0000-00-00 00:00:00' AND site_id = $this->site_id ORDER BY createDate ASC");
+        }else{
+            $result = $this->wpdb->get_results("SELECT * FROM $this->tableNameChats WHERE open = 0 AND stopDate < CURRENT_TIMESTAMP AND stopDate != '0000-00-00 00:00:00' ORDER BY createDate ASC");
+        } 
+        
+        // TO BE DELETED!
     	// get their id's from db
-        $result = $this->wpdb->get_results("SELECT * FROM $this->tableNameChats WHERE open = 0 AND stopDate < CURRENT_TIMESTAMP AND stopDate != '0000-00-00 00:00:00' ORDER BY createDate ASC");
+        //$result = $this->wpdb->get_results("SELECT * FROM $this->tableNameChats WHERE open = 0 AND stopDate < CURRENT_TIMESTAMP AND stopDate != '0000-00-00 00:00:00' ORDER BY createDate ASC");
         return $result;     	
     }
 
     public function get_future_chats()
     {
-    	// get chats that will appear in the future
+        // get chats that will appear in the future
         $result = $this->wpdb->get_results("SELECT * FROM $this->tableNameChats WHERE open = 0 AND createDate > CURRENT_TIMESTAMP AND stopDate = '0000-00-00 00:00:00' ORDER BY createDate ASC");
         return $result;       	
     }
@@ -177,7 +216,8 @@ class ExpertChat
         	array( 
         		'chat_id' => $chat_id, 
         		'name' => $name,
-        		'question' => $question
+        		'question' => $question,
+                        'answer' => ''
         	)
         );
         
@@ -234,6 +274,7 @@ class ExpertChat
 	}
 
 	// install function, ie create or update the database
+        // Version 0.05 changes: Added column site_id to table _expertchat_chats
     public static function install() 
     {
         
@@ -249,6 +290,7 @@ class ExpertChat
             $table_name = $wpdb->prefix . ExpertChat::$tables['expertchats'];
             $sql = "CREATE TABLE " . $table_name . " (
     	        id mediumint(9) NOT NULL AUTO_INCREMENT,
+                site_id mediumint(9) NULL,
     	        createDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     	        stopDate datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
     	        open TINYINT NOT NULL,
@@ -293,17 +335,20 @@ class ExpertChat
     {
         // css
         wp_register_style('ExpertChatAdminCss', plugins_url('css/style.css', __FILE__));
-
+        wp_register_script('yoohoo', 'http://code.jquery.com/jquery-1.7.2.min.js');
         // load script
-		wp_register_script('ExpertChatModal', plugins_url('/js/jquery.simplemodal.1.4.1.min.js', __FILE__));
-		wp_register_script('Placeholder', plugins_url('/js/jquery.placeholder.js', __FILE__));
+        wp_register_script('ExpertChatModal', plugins_url('/js/jquery.simplemodal.1.4.1.min.js', __FILE__));
+        wp_register_script('Placeholder', plugins_url('/js/jquery.placeholder.js', __FILE__));
     }     
+    
 }
 
 // hooks for install and update
 register_activation_hook(__FILE__, 'ExpertChat::install');
 add_action('plugins_loaded', 'ExpertChat::update');
-add_action('admin_menu', 'ExpertChat::setRequiredReferences');
+//add_action('admin_menu', 'ExpertChat::setRequiredReferences');
+//Add plugin menu to network admin. 
+add_action('network_admin_menu', 'ExpertChat::setRequiredReferences');
 
 // load admin page
 require_once('twentyfour-expert-chat-admin.php');
