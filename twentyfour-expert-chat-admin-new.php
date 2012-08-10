@@ -12,7 +12,7 @@
     $user = $_POST["user"];
     $chattitle = $_POST["chattitle"];
     $chattext = $_POST["chattext"];
-    $site = $_POST['site'];
+    $blog = $_POST['blog'];
     
     global $wpdb;
     $wp_user_search = $wpdb->get_results("SELECT ID, display_name FROM $wpdb->users ORDER BY ID");
@@ -21,10 +21,15 @@
     $chatadmin = new ExpertChat();
     
     if( $startDate != "" && intval($user) > 0):
-        $chatadmin->create_chat($startDate, $user, $chattitle, $chattext, $site);
+        $chatadmin->create_chat($startDate, $user, $chattitle, $chattext, $blog);
         echo "<h3>Din chatt är tillagd. Du kan fortsätta skapa ytterligare chattar.</h3>";
     endif;
+    
+   
     ?>
+    
+    
+    
     <form method="post" action="" id="newChatForm">
         <input type="text" name="chattitle" id="chattitle" placeholder="Chattens titel" />
         <select type="text" name="startDateYear" class="startDate" placeholder="YYYY">
@@ -122,17 +127,27 @@
             <option value="50">50</option>
         </select>
         
-        <?php
+   
         
-            $sites = get_blog_list(0, 'all');
-            
-        ?>
-        
-        <select type="text" name="site" id="site">
+        <select type="text" name="blog" id="blog">
             <option selected="selected">Välj site</option>
-            <?php foreach($sites as $site): ?>
-            <option value="<?php echo $site['blog_id']; ?>"><?php echo $site['path']; ?></option>    
-            <?php endforeach; ?>
+            <?php 
+        
+                if(is_network_admin()){
+                    $blogs = get_blog_list(0, 'all');
+                
+                    foreach($blogs as $blog){
+                        echo '<option value="'.$blog['blog_id'].'">'.$blog['path'].'</option>';
+                    }
+                    
+                }else{
+                    global $blog_id;
+                    echo '<option value="'.$blog_id.'">'.get_bloginfo().'</option>';
+                }
+    
+            ?>
+
+        
         </select>
         <select type="text" name="user" id="user" placeholder="user id">
             <option selected="selected">Välj användare</option>
@@ -155,6 +170,7 @@
         ?>
     </ol>
 </div>
+
 <script type="text/javascript">
     function deleteChat(id)
     {
@@ -170,4 +186,27 @@
             }
         });	        
     }
+    
+    
+    jQuery('#blog').change(function(){
+        
+        jQuery.ajax({
+            type: "POST",
+            url: "<?php echo $pluginRoot ?>/api/get_blog_users.php",
+            data: {blogid: this.value},
+            success: function(data){
+                jQuery('#user').empty();
+           
+                for(u in data){
+                    var value = jQuery('<option/>').attr('value', data[u].ID);
+                    
+                    value.text(data[u].user_login);
+                    value.appendTo('#user');
+                }
+       
+            }
+        });
+        
+    });
+    
 </script>

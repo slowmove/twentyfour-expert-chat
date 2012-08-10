@@ -1,43 +1,66 @@
 <?php
 
 // create custom plugin settings menu
-//add_action('admin_menu', 'ExpertChat_create_menu');
+add_action('admin_menu', 'ExpertChat_create_menu');
+//Add plugin menu to network admin.
 add_action('network_admin_menu', 'ExpertChat_create_menu');
+
 
 function ExpertChat_create_menu() 
 {
     // create admin page
-    
-    add_menu_page('Expertchatt', 'Expertchatt', 'manage_options', __DIR__, 'expertchat_admin_page');
-	add_submenu_page(__DIR__, 'Arkiverade chattar', 'Arkiverade chattar', 'manage_options', 'twentyfourExpertChat_archive', 'twentyfourExpertChat_archive_page');
-	add_submenu_page(__DIR__, 'Hantera chattar', 'Hantera chattar', 'manage_options', 'twentyfourExpertChat_new', 'twentyfourExpertChat_new_page');
-    
-	wp_enqueue_style('ExpertChatAdminCss');
-	wp_enqueue_script('jquery'); 
-	wp_enqueue_script('ExpertChatModal');
-	wp_enqueue_script('Placeholder');  
+    add_menu_page('Expertchatt', 'Expertchatt', 'expertchat_options', __DIR__, 'expertchat_admin_page');
+    add_submenu_page(__DIR__, 'Arkiverade chattar', 'Arkiverade chattar', 'expertchat_options', 'twentyfourExpertChat_archive', 'twentyfourExpertChat_archive_page');
+    add_submenu_page(__DIR__, 'Hantera chattar', 'Hantera chattar', 'expertchat_options_handle', 'twentyfourExpertChat_new', 'twentyfourExpertChat_new_page');
+
+    wp_enqueue_style('ExpertChatAdminCss');
+    wp_enqueue_script('jquery'); 
+    wp_enqueue_script('ExpertChatModal');
+    wp_enqueue_script('Placeholder');  
 }
 
 function expertchat_admin_page() 
-{    
+{
     // get the plugin base url
     $pluginRoot = plugins_url('', __FILE__);
-
-    $expertchatAdmin = new ExpertChat();
+    
+    //Check if current admin is network admin. If network admin, don't specifie blog_id (get chat data from all blogs)
+    if(is_network_admin()){
+        $blog_id = null;
+    }else{
+      global $blog_id;
+    }
+    
+    $expertchatAdmin = new ExpertChat($blog_id);
     $questions = $expertchatAdmin->get_unanswered_questions();
-	$is_active = $expertchatAdmin->is_active_chat();
+    $is_active = $expertchatAdmin->is_active_chat();
 	?>
     <div class="wrap tfmac">
         <h2>Expertchatt-admin</h2>
 		<?php
 		if($is_active > 0):
-			$activechat = $expertchatAdmin->get_active_chat();
-			$date = new DateTime($activechat->stopDate);
-		?>
-		<h3 class="activeState">Chatten är aktiv</h3>
+                    $activechat = $expertchatAdmin->get_active_chat();
+                    $date = new DateTime($activechat->stopDate);
+                    
+                    if(is_network_admin()):
+                        foreach($activechat as $activechat):
+                    
+                ?>
+		<h3 class="activeState">Chatten <?php echo $activechat->title; ?> är aktiv</h3>
 		Du chattar nu som <?php the_author_meta("display_name",$activechat->user); ?>, chatten är satt att pågå till ungefär <strong><?php echo $date->format('H:i'); ?></strong> <br/>
 		<input type="hidden" value="<?php echo $activechat->id ?>" id="currentchatid" />
 		<input type="button" value="Avsluta chatten" onclick="stopCurrentChat();" />
+                <?php
+                       endforeach;
+                   else:
+                ?>
+                <h3 class="activeState">Chatten <?php echo $activechat->title; ?> är aktiv</h3>
+		Du chattar nu som <?php the_author_meta("display_name",$activechat->user); ?>, chatten är satt att pågå till ungefär <strong><?php echo $date->format('H:i'); ?></strong> <br/>
+		<input type="hidden" value="<?php echo $activechat->id ?>" id="currentchatid" />
+		<input type="button" value="Avsluta chatten" onclick="stopCurrentChat();" />
+                <?php endif;  ?>
+                
+                
         <div class="innerWrapper">
             <table id="mailList">
                 <thead>
@@ -106,18 +129,21 @@ function expertchat_admin_page()
 		endif;
 		?>
                         
+                
                 <?php
-                $nextchats = $expertchatAdmin->get_future_chats();
-			if ( count($nextchats) > 0):
-				$nextchat = $nextchats[0];
-				?>
-				<p>
-					<strong>Nästkommande chatt: </strong><br/>
-					<?php echo $nextchat->title; ?> - Ska starta <?php echo $nextchat->createDate; ?>
-					<input type="button" onclick="startChat();" value="Starta chatten" />
-				</p>
-				<?php
-			endif;
+                    $nextchats = $expertchatAdmin->get_future_chats();
+                    if ( count($nextchats) > 0):
+                ?>
+                    <p>
+                    <strong>Nästkommande chatt: </strong><br/>
+                <?php
+                        foreach($nextchats as $nextchat): ?>
+                        <?php echo $nextchat->title; ?> - Ska starta <?php echo $nextchat->createDate; ?>
+                        <input type="button" onclick="startChat(<?php echo $nextchat->id;?>);" value="Starta chatten" />
+                        </p>
+                <?php
+                        endforeach;
+                    endif;
                 ?>
                         
 	</div>
@@ -237,6 +263,7 @@ function expertchat_admin_page()
                 
             });
             
+            
         });
 		
 		function stopCurrentChat() {
@@ -253,18 +280,22 @@ function expertchat_admin_page()
 			});			
 		}
 		
-		function startChat() {
+                //Chatid to determine which chat to start.
+		function startChat(id) {
 			jQuery.ajax({
 				type: "POST",
 				url: "<?php echo $pluginRoot ?>/api/open-chat.php",
+                                data: {chatid: id},
 				async: true,
 				timeout: 50000,
 				success: function(data) {
 					location.reload();					
 				}
 			});					
-		}
 		
+                }
+	
+                
 		function getData() {
 			var chatid =  jQuery("#chatid").val();
 			var latest = jQuery("#latest").val();
@@ -273,23 +304,29 @@ function expertchat_admin_page()
 				url: "<?php echo $pluginRoot ?>/api/get-new-questions.php",
 				async: true,
 				timeout: 50000,
-				data: { chatid: chatid, latest:latest },
-				success: function(data) {
+				data: {
+                                    <?php if(is_network_admin() == false){
+                                    echo 'chatid: chatid,'; 
+                                    } 
+                                    ?>
+                                    latest:latest},
+                                    success: function(data) {
 					for(i=0; i<data.length; i++)
 					{
-						jQuery('#latest').val(data[i].createDate);
+                                                jQuery('#latest').val(data[i].createDate);
 						var rawDate = data[i].createDate.replace(/-/g, " ");
-						var myDate = new Date( rawDate );
+                                                var myDate = new Date(rawDate);
 						var time =   (myDate.getHours() < 10 ? "0" + myDate.getHours() : myDate.getHours()) + ":" + (myDate.getMinutes() < 10 ? "0" + myDate.getMinutes() : myDate.getMinutes());
 						var name = data[i].name;
 						var q = data[i].question;
 						var id = data[i].id;           
 						jQuery("#mailList tbody").append('<tr class="item" id="mailItem-'+id+'"><td class="date">'+time+'</td><td class="name"><span>'+name+'</span><input type="hidden" name="message" class="messageField" value="'+q+'" /><input type="hidden" name="mailId" class="mailId" value="'+id+'" /></td><td class="message">'+q+'</td></tr>');
-						
-					}
+					
+                                         }
 					setTimeout("getData()", 1000);
 				}
 			});
+                        
 		}        
 
     </script>

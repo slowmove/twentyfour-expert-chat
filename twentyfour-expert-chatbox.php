@@ -56,7 +56,7 @@ if ( $expertchat->is_active_chat() || count($expertchat->get_archived_chats()) !
                         <p>'. $date->format('H:i') .'</p>
                         <p class="name">Administrator</p>
                     </div>
-                    <p class="message">'.get_the_author_meta("first_name", $activechat->user).' gör sig beredd på att starta dagens diskussion här på stödlinjen.se</p>
+                    <p class="message">'.get_the_author_meta("first_name", $activechat->user).' gör sig beredd på att starta dagens diskussion</p>
                 </div>        
             ';
             
@@ -101,7 +101,7 @@ if ( $expertchat->is_active_chat() || count($expertchat->get_archived_chats()) !
                 <p><a target="_blank" href="/mer-information-om/anonymitet/">» Anonymitet</a></p>
                 <img src="'. $pluginRoot .'/img/load.gif" id="loadImg" style="display:none;" />                
             </div>
-            <p class="messageInfo">Din kommentar eller fråga kommer modereras av Stödlinjen och därefter publiceras tillsammans med svar.</p>
+            <p class="messageInfo">Din kommentar eller fråga kommer modereras och därefter publiceras tillsammans med svar.</p>
             ';
         ?>
         <script type="text/javascript">
@@ -122,6 +122,7 @@ if ( $expertchat->is_active_chat() || count($expertchat->get_archived_chats()) !
                                 $.post("<?php echo $pluginRoot ?>/api/post-question.php", {chat_id: chatid, qname: qname, question:question}, response).error(answerError);
                             else
                                 alert("Du måste fylla i namn och meddelande för att kunna ställa en fråga.");
+                            
                         }
             );
             
@@ -143,7 +144,7 @@ if ( $expertchat->is_active_chat() || count($expertchat->get_archived_chats()) !
                     url: "<?php echo $pluginRoot ?>/api/get-new-answers.php",
                     async: true,
                     timeout: 50000,
-                    data: { chatid: chatid, latest:latest },
+                    data: {chatid: chatid, latest:latest },
                     success: function(data) {
                         if( data.error )
                         {

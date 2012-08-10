@@ -3,8 +3,11 @@
     <?php
     $chatid = $_GET["chatid"];
 
+    global $blog_id;
+    
+    
     $pluginRoot = plugins_url('', __FILE__);
-    $chatadmin = new ExpertChat();
+    $chatadmin = new ExpertChat($blog_id);
     
     if( intval($chatid) > 0):
         $questions = $chatadmin->get_answered_questions($chatid);
