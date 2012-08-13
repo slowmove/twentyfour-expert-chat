@@ -1,4 +1,4 @@
-<div class="wrap tfmac">    
+<div class="wrap tfmac">
     <h2>Skapa ny expertchatt</h2>
     <?php
     $startDateYear = $_POST["startDateYear"];
@@ -6,30 +6,32 @@
     $startDateDay = $_POST["startDateDay"];
     $startDateHour = $_POST["startDateHour"];
     $startDateMinute = $_POST["startDateMinute"];
-    
+
     $startDate = $startDateYear . "-" . $startDateMonth . "-" . $startDateDay . " " . $startDateHour . ":". $startDateMinute;
-    
+
     $user = $_POST["user"];
     $chattitle = $_POST["chattitle"];
     $chattext = $_POST["chattext"];
     $blog = $_POST['blog'];
-    
+
     global $wpdb;
     $wp_user_search = $wpdb->get_results("SELECT ID, display_name FROM $wpdb->users ORDER BY ID");
-    
+
     $pluginRoot = plugins_url('', __FILE__);
-    $chatadmin = new ExpertChat();
-    
+    global $blog_id;
+    $blogid = $is_network_admin ? null : $blog_id;
+    $chatadmin = new ExpertChat($blogid);
+
     if( $startDate != "" && intval($user) > 0):
         $chatadmin->create_chat($startDate, $user, $chattitle, $chattext, $blog);
         echo "<h3>Din chatt är tillagd. Du kan fortsätta skapa ytterligare chattar.</h3>";
     endif;
-    
-   
+
+
     ?>
-    
-    
-    
+
+
+
     <form method="post" action="" id="newChatForm">
         <input type="text" name="chattitle" id="chattitle" placeholder="Chattens titel" />
         <select type="text" name="startDateYear" class="startDate" placeholder="YYYY">
@@ -56,7 +58,7 @@
             <option value="09">september</option>
             <option value="10">oktober</option>
             <option value="11">november</option>
-            <option value="12">december</option>            
+            <option value="12">december</option>
         </select>
         <select type="text" name="startDateDay" class="startDate" placeholder="DD">
             <option value="01" selected="selected">01</option>
@@ -91,7 +93,7 @@
             <option value="30">30</option>
             <option value="31">31</option>
         </select>
-        Klockan 
+        Klockan
         <select type="text" name="startDateHour" class="startDate" placeholder="HH">
             <option value="01" selected="selected">01</option>
             <option value="02">02</option>
@@ -116,7 +118,7 @@
             <option value="21">21</option>
             <option value="22">22</option>
             <option value="23">23</option>
-            <option value="24">24</option>            
+            <option value="24">24</option>
         </select>
         <select type="text" name="startDateMinute" class="startDate" placeholder="MM">
             <option value="00" selected="selected">00</option>
@@ -126,28 +128,28 @@
             <option value="40">40</option>
             <option value="50">50</option>
         </select>
-        
-   
-        
+
+
+
         <select type="text" name="blog" id="blog">
             <option selected="selected">Välj site</option>
-            <?php 
-        
+            <?php
+
                 if(is_network_admin()){
                     $blogs = get_blog_list(0, 'all');
-                
+
                     foreach($blogs as $blog){
                         echo '<option value="'.$blog['blog_id'].'">'.$blog['path'].'</option>';
                     }
-                    
+
                 }else{
                     global $blog_id;
                     echo '<option value="'.$blog_id.'">'.get_bloginfo().'</option>';
                 }
-    
+
             ?>
 
-        
+
         </select>
         <select type="text" name="user" id="user" placeholder="user id">
             <option selected="selected">Välj användare</option>
@@ -184,29 +186,29 @@
                 //location.reload();
                 jQuery("#" + id).hide();
             }
-        });	        
+        });
     }
-    
-    
+
+
     jQuery('#blog').change(function(){
-        
+
         jQuery.ajax({
             type: "POST",
             url: "<?php echo $pluginRoot ?>/api/get_blog_users.php",
             data: {blogid: this.value},
             success: function(data){
                 jQuery('#user').empty();
-           
+
                 for(u in data){
                     var value = jQuery('<option/>').attr('value', data[u].ID);
-                    
+
                     value.text(data[u].user_login);
                     value.appendTo('#user');
                 }
-       
+
             }
         });
-        
+
     });
-    
+
 </script>
