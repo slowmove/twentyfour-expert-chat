@@ -352,8 +352,17 @@ class ExpertChat {
         // load script
         wp_register_script('ExpertChatModal', plugins_url('/js/jquery.simplemodal.1.4.1.min.js', __FILE__));
         wp_register_script('Placeholder', plugins_url('/js/jquery.placeholder.js', __FILE__));
+     
     }
 
+    public static function setRequiredChatboxReferences(){
+        
+        wp_deregister_style('ExpertChatChatboxCss');
+        wp_register_style('ExpertChatChatboxCss', plugins_url('css/chatbox.css', __FILE__));
+        wp_enqueue_style('ExpertChatChatboxCss');
+    
+    }
+    
 }
 
 // hooks for install and update
@@ -362,6 +371,7 @@ add_action('plugins_loaded', 'ExpertChat::update');
 add_action('admin_menu', 'ExpertChat::setRequiredReferences');
 //Add js and css to network admin dashboard.
 add_action('network_admin_menu', 'ExpertChat::setRequiredReferences');
+add_action('wp_enqueue_scripts', 'ExpertChat::setRequiredChatboxReferences');
 
 // load admin page
 require_once('twentyfour-expert-chat-admin.php');

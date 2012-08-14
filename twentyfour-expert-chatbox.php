@@ -6,7 +6,6 @@ $activechat = $expertchat->get_active_chat();
 $expert_name = get_the_author_meta("first_name", $activechat->user);
 $date = new DateTime($activechat->createDate);
 
-
 //echo "is active: " . $expertchat->is_active_chat() . "<br/>";
 //echo "archived chats: " . count($expertchat->get_archived_chats());
 
@@ -19,7 +18,7 @@ if ( $expertchat->is_active_chat() || count($expertchat->get_archived_chats()) !
         $chatid = $_GET["chatid"];
         if( intval($chatid) > 0 )
             $activechat = $expertchat->get_chat(intval($chatid));
-        
+            
         $offlinetext = "OBS! Denna chat är avslutad!";
     }
     else
@@ -47,17 +46,18 @@ if ( $expertchat->is_active_chat() || count($expertchat->get_archived_chats()) !
         <div id="chatbox">                
             <div class="chatHead">
                 <h2>'.$headline.' expertchatt - '. $activechat->title .'</h2>
-                <span>'. $offlinetext .'</span>
-                '.$byline.'
+                <span>'.$offlinetext .'</span>        
             </div>
             <div id="chat">
                 <div class="message expert">
                     <div class="time">
-                        <p>'. $date->format('H:i') .'</p>
-                        <p class="name">Administrator</p>
+                        <p>'.$byline.'</p>
+                        <p>'. $date->format('H:i') .' Administrator '.get_the_author_meta("first_name", $activechat->user).' gör sig beredd på att starta dagens diskussion</p>
+                        <!---<p class="name"></p>---->        
                     </div>
-                    <p class="message">'.get_the_author_meta("first_name", $activechat->user).' gör sig beredd på att starta dagens diskussion</p>
-                </div>        
+                    <!---<p class="message">'.get_the_author_meta("first_name", $activechat->user).' gör sig beredd på att starta dagens diskussion</p>--->
+                </div>       
+                
             ';
             
             $questions = $expertchat->get_answered_questions($activechat->id );        
@@ -69,18 +69,18 @@ if ( $expertchat->is_active_chat() || count($expertchat->get_archived_chats()) !
                 echo '
                 <div class="message">
                     <div class="time">
-                        <p>'. $time->format('H:i') .'</p>
-                        <p class="name">'.$name.'</p>
+                        <p>'. $time->format('H:i') .' - '.$name.'</p>
+                        <!---<p class="name">'.$name.'</p>---->
                     </div>
                     <p class="message">'.$q.'</p>
                 </div>
                 <div class="message expert">
                     <div class="time">
-                        <p>'. $time->format('H:i') .'</p>
-                        <p class="name">'.get_the_author_meta("first_name", $activechat->user).'</p>
+                        <p>'. $time->format('H:i') .' - '.get_the_author_meta("first_name", $activechat->user).'</p>
+                        <!----<p class="name">'.get_the_author_meta("first_name", $activechat->user).'</p>---->
                     </div>
                     <p class="message">'.$a.'</p>
-                </div>            
+                </div>
                 ';
                 $latest = $question->createDate;
             endforeach;
@@ -93,15 +93,13 @@ if ( $expertchat->is_active_chat() || count($expertchat->get_archived_chats()) !
         ';
         if ( $active ):
             echo '
-            <div class="form commentForm expertChatForm">
-                <input type="text" id="qname" class="text" value="" placeholder="Ditt namn (eller nickname)" />
-                <textarea class="comment" id="question" placeholder="Skriv till experten här:"></textarea>
-                <input type="submit" class="button" value="Skicka" />
-                
-                <p><a target="_blank" href="/mer-information-om/anonymitet/">» Anonymitet</a></p>
-                <img src="'. $pluginRoot .'/img/load.gif" id="loadImg" style="display:none;" />                
+            <div class="expertChatForm">
+                <p>
+                  <input type="text" id="qname" class="text" value="" placeholder="Ditt namn (eller nickname)" />
+                  <textarea class="comment" id="question" placeholder="Skriv till experten här:"></textarea>
+                  <input type="submit" class="button" value="Skicka" />
+                </p>
             </div>
-            <p class="messageInfo">Din kommentar eller fråga kommer modereras och därefter publiceras tillsammans med svar.</p>
             ';
         ?>
         <script type="text/javascript">
@@ -152,7 +150,7 @@ if ( $expertchat->is_active_chat() || count($expertchat->get_archived_chats()) !
                             var time = (myDate.getHours() < 10 ? "0" + myDate.getHours() : myDate.getHours()) + ":" + (myDate.getMinutes() < 10 ? "0" + myDate.getMinutes() : myDate.getMinutes());
                             $(".messageInfo").hide();
                             $(".expertChatForm").hide();
-                            $("#chat").append('<div class="message expert"><div class="time"><p>' + time +'</p><p class="name"><?php echo get_the_author_meta("first_name", $activechat->user); ?> </p></div><p class="message">'+data.message+'</p></div>');
+                            $("#chat").append('<div class="message expert"><div class="time"><p>' + time +' - ' + <?php echo get_the_author_meta("first_name", $activechat->user); ?>  + '</p></div><p class="message">'+data.message+'</p></div>');
                             document.getElementById('chat').scrollTop = 9999999;
                         }
                         else
@@ -167,7 +165,7 @@ if ( $expertchat->is_active_chat() || count($expertchat->get_archived_chats()) !
                                 var q = data[i].question;
                                 var a = data[i].answer;
                                 var expert = $('.name').html();                        
-                                $("#chat").append('<div class="message"><div class="time"><p>'+time+'</p><p class="name">'+name+'</p></div><p class="message">'+q+'</p></div><div class="message expert"><div class="time"><p>' + time +'</p><p class="name"><p class="name"><?php echo get_the_author_meta("display_name", $activechat->user); ?> </p></div><p class="message">'+a+'</p></div>');
+                                $("#chat").append('<div class="message"><div class="time"><p>'+time+' - ' + name + '</p></div><p class="message">'+q+'</p></div><div class="message expert"><div class="time"><p>' + time + ' -  <?php echo get_the_author_meta("display_name", $activechat->user); ?> </p> </div><p class="message">'+a+'</p></div>');
                                 
                                 document.getElementById('chat').scrollTop = 9999999;
                             }

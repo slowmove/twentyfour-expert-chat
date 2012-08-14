@@ -1,0 +1,25 @@
+/* 
+    Document   : chatbox.css
+    Created on : 2012-aug-14, 10:09:16
+    Author     : hoshitaufig
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+
+#qname{
+    width: 300px;
+    margin-bottom: 10px;
+}
+
+#question{
+    float:left;
+    clear: left;
+    width: 400px;
+    padding-left: 4px;
+}
+
+.button{
+    float: left;
+    margin-left: 10px;
+}
