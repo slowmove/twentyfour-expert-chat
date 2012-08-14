@@ -28,7 +28,9 @@
   
 ## Usage
 ```php
+<?php
 global $blog_id;
 $chat = new ExpertChat($blog_id);
 $chat->render_chat_box();
+?>
 ```
