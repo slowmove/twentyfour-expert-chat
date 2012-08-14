@@ -6,10 +6,15 @@
         Purpose of the stylesheet follows.
 */
 
+.messageInfo{
+    clear: both;
+}
 
 #qname{
+    float: left;
     width: 300px;
-    margin-bottom: 10px;
+    margin: 10px;
+    
 }
 
 #question{
@@ -17,9 +22,60 @@
     clear: left;
     width: 400px;
     padding-left: 4px;
+    margin: 10px;
+    margin-top: 0px;
 }
 
 .button{
     float: left;
-    margin-left: 10px;
+    margin: 5px;
+}
+
+#chatbox #chat div.message{
+    text-align: left;
+}
+
+#chatbox #chat div.message p{
+}
+
+#chatbox #chat div.message p.message{
+    clear: both;
+}
+
+#chatbox #chat div.message .time{
+    float: left;
+}
+
+#chatbox #chat div.message .time p{
+    float: left;
+}
+
+#chatbox #chat div.message .time .name{
+    float: left;
+}
+
+
+/*--------------*/
+
+#chatbox #chat div.expert{
+    text-align: right;
+}
+
+#chatbox #chat div.expert p{
+}
+
+#chatbox #chat div.expert p.message{
+    clear: both;
+}
+
+#chatbox #chat div.expert .time{
+    float: right;
+}
+
+#chatbox #chat div.expert .time p{
+    float: right;
+}
+
+#chatbox #chat div.expert .time .name{
+    float: right;
 }
