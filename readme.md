@@ -6,7 +6,7 @@
 
   Version: 1.0
 
-  Author: Erik Johansson
+  Author: Erik Johansson & Hoshi Taufig
 
   Author URI: http://24hr.se
 
