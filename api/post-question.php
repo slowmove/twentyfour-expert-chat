@@ -1,6 +1,6 @@
 <?php
 
-	require_once(__DIR__ . '/../../../../wp-config.php');
+	require_once(dirname(__file__) . '/../../../../wp-config.php');
 
     // get question content
     $chat_id = isset($_POST["chat_id"]) ? intval($_POST["chat_id"]) : -1;

@@ -1,6 +1,6 @@
 <?php
 
-	require_once(__DIR__ . '/../../../../wp-config.php');
+	require_once(dirname(__file__) . '/../../../../wp-config.php');
 
     if ( is_user_logged_in() ) 
     {

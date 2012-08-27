@@ -1,6 +1,6 @@
 <?php
 
- 	require_once(__DIR__ . '/../../../../wp-config.php');
+ 	require_once(dirname(__file__) . '/../../../../wp-config.php');
 	
 	//$chatid = $_GET["chatid"];
 	//$latest = $_GET["latest"];

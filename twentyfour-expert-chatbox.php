@@ -181,6 +181,6 @@ if ( $expertchat->is_active_chat() || count($expertchat->get_archived_chats()) !
 }
 else
 {
-    echo "Det finns tyvärr inga chattar att visa. Se här till höger när nästkommande chatt kommer vara.";
+    echo "<p>Det finns tyvärr inga chattar att visa. </p>";
 }
 ?>

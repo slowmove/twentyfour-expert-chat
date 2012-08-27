@@ -9,9 +9,9 @@ add_action('network_admin_menu', 'ExpertChat_create_menu');
 function ExpertChat_create_menu() 
 {
     // create admin page
-    add_menu_page('Expertchatt', 'Expertchatt', 'expertchat_options', __DIR__, 'expertchat_admin_page');
-    add_submenu_page(__DIR__, 'Arkiverade chattar', 'Arkiverade chattar', 'expertchat_options', 'twentyfourExpertChat_archive', 'twentyfourExpertChat_archive_page');
-    add_submenu_page(__DIR__, 'Hantera chattar', 'Hantera chattar', 'expertchat_options_handle', 'twentyfourExpertChat_new', 'twentyfourExpertChat_new_page');
+    add_menu_page('Expertchatt', 'Expertchatt', 'expertchat_options', dirname(__file__), 'expertchat_admin_page');
+    add_submenu_page(dirname(__file__), 'Arkiverade chattar', 'Arkiverade chattar', 'expertchat_options', 'twentyfourExpertChat_archive', 'twentyfourExpertChat_archive_page');
+    add_submenu_page(dirname(__file__), 'Hantera chattar', 'Hantera chattar', 'expertchat_options_handle', 'twentyfourExpertChat_new', 'twentyfourExpertChat_new_page');
 
     wp_enqueue_style('ExpertChatAdminCss');
     wp_enqueue_script('jquery'); 
